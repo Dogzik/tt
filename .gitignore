@@ -1,0 +1,8 @@
+*.zip
+*.exe
+*.cmi
+*.cmo
+*lexer.ml
+*parser.ml
+*parser.mli
+*tmp.txt
