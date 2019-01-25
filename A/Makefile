@@ -1,6 +1,7 @@
 .PHONY: pack all run clean
 GENERATED=src/parser.mli src/parser.ml src/lexer.ml
 OCAMLC=ocamlopt # ocamlopt for speed
+SRC=src/grammar.ml
 PACKAGE=A.zip
 
 ifeq ($(OS),Windows_NT)
@@ -14,11 +15,8 @@ all: main.exe
 run:
 	./main.exe
 
-src/grammar.cmi:
-	cd src && $(OCAMLC) -c grammar.ml
-
-main.exe: $(GENERATED) src/grammar.cmi
-	cd src && $(OCAMLC) grammar.ml $(GENERATED:src/%=%) main.ml -o ../main.exe
+main.exe: $(GENERATED) $(SRC) src/main.ml
+	cd src && $(OCAMLC) $(SRC:src/%=%) $(GENERATED:src/%=%) main.ml -o ../main.exe
 
 pack: $(GENERATED)
 	zip $(PACKAGE) -r Makefile src
