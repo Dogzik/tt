@@ -33,21 +33,27 @@ let print_eq eq = fprintf stdout "%s = %s\n" (term_to_string eq.left) (term_to_s
 
 
 
-let rec get_system expr ind map = match expr with
+let rec get_system expr ind map_free map_bond = match expr with
   | Var(Name (s)) -> begin
-                        if (not (Ht.mem map s)) then Ht.add map s (ind + 1);
-                        ([],  Atom(Ht.find map s), (ind + 1), map)
+                        let id = if (not (Ht.mem map_bond s)) then begin
+                            if (not (Ht.mem map_free s)) then Ht.add map_free s (ind + 1);
+                            Ht.find map_free s
+                          end
+                        else Ht.find map_bond s
+                        in
+                        ([],  Atom(id), (ind + 1))
                       end
   | Apl (p, q) -> begin
-                    let (e_p, t_p, ind_1, map_1) = get_system p ind map in
-                    let (e_q, t_q, ind_2, map_2) = get_system q ind_1 map_1 in
+                    let (e_p, t_p, ind_1) = get_system p ind map_free map_bond in
+                    let (e_q, t_q, ind_2) = get_system q ind_1 map_free map_bond in
                     let e = {left = t_p; right = Impl(t_q, Atom(ind_2 + 1))}::(List.rev_append e_p e_q) in
-                    (e, Atom(ind_2 + 1), (ind_2 + 1), map_2)
+                    (e, Atom(ind_2 + 1), (ind_2 + 1))
                   end
   | Lambda (Name (s), p) -> begin
-                              let (e, t_p, ind_1, map_1) = get_system p ind map in
-                              if (not (Ht.mem map_1 s)) then Ht.add map_1 s (ind + 1);
-                              (e, Impl(Atom(Ht.find map_1 s), t_p), (ind + 1), map_1)
+                              Ht.add map_bond s (ind + 1);
+                              let (e, t_p, ind_1) = get_system p (ind + 1) map_free map_bond in
+                              Ht.remove map_bond s;
+                              (e, Impl(Atom(ind + 1), t_p), (ind_1 + 1))
                             end
 ;;
 
