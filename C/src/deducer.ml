@@ -44,7 +44,7 @@ let rec proof_inner expr solution map_free map_bond ctx cur_tab ind = match expr
                     let cur_s = String.concat "" ["("; p_s; " "; q_s; ")"] in
                     let cur_t = match p_t with
                       | Impl(a, b) -> b
-                      | _ -> raise Not_found;
+                      | _ -> raise (Failure("KEK"));
                     in
                     let gap = if ((String.length ctx) = 0) then "" else " " in
                     let cur_step = String.concat "" [cur_tab; ctx; gap; "|- "; cur_s; " : "; (term_to_string cur_t); " [rule #2]"] in
