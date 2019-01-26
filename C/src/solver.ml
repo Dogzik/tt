@@ -43,22 +43,22 @@ let rec get_system expr ind map_free map_bond = match expr with
                         in
                         ([],  Atom(id), (ind + 1))
                       end
-  | Apl (p, q) -> begin
+  | Apl(p, q) -> begin
                     let (e_p, t_p, ind_1) = get_system p ind map_free map_bond in
                     let (e_q, t_q, ind_2) = get_system q ind_1 map_free map_bond in
                     let e = {left = t_p; right = Impl(t_q, Atom(ind_2 + 1))}::(List.rev_append e_p e_q) in
                     (e, Atom(ind_2 + 1), (ind_2 + 1))
                   end
-  | Lambda (Name (s), p) -> begin
-                              Ht.add map_bond s (ind + 1);
-                              let (e, t_p, ind_1) = get_system p (ind + 1) map_free map_bond in
-                              Ht.remove map_bond s;
-                              (e, Impl(Atom(ind + 1), t_p), (ind_1 + 1))
-                            end
+  | Lambda(Name(s), p) -> begin
+                            Ht.add map_bond s (ind + 1);
+                            let (e, t_p, ind_1) = get_system p (ind + 1) map_free map_bond in
+                            Ht.remove map_bond s;
+                            (e, Impl(Atom(ind + 1), t_p), ind_1)
+                          end
 ;;
 
 let rec has_atom term atom = match term with
-  | Atom(b) -> atom = Atom(b)
+  | Atom(b) -> atom = term
   | Impl(a, b) -> (has_atom a atom) || (has_atom b atom)
 ;;
 
@@ -112,7 +112,7 @@ let rec solve_system system substed = if (List.exists bad_equal system) then Non
   *)
   let system5 = match (List.find_opt (is_subst substed) system4) with
     | None -> List.rev system4
-    | Some(rule) ->  begin
+    | Some(rule) -> begin
                       Ht.add substed (rule.left) true;
                       List.rev_map (subst rule) system4
                     end
@@ -132,7 +132,6 @@ let rec solve_system system substed = if (List.exists bad_equal system) then Non
       solve_system system6 substed
     end
 end;;
-
 
 let rec apply_subst term solution = match term with
   | Atom(x) ->  (match (List.find_opt (fun equal -> equal.left = term) solution) with

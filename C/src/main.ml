@@ -30,8 +30,7 @@ let expr = read_stdin () >> Lexing.from_string >> Parser.main Lexer.main;;
 
 let map_free = (Ht.create 228 : (string, int) Ht.t);;
 let map_bond = (Ht.create 228 : (string, int) Ht.t);;
-let ind1 = 0;;
-let (e, t, ind2) = get_system expr ind1 map_free map_bond;;
+let (e, t, ind) = get_system expr 0 map_free map_bond;;
 
 let substed = (Ht.create 228 : (alg_term, bool) Ht.t);;
 match (solve_system e substed) with
