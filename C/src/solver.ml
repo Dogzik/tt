@@ -35,11 +35,14 @@ let print_expr e = fprintf stdout "%s\n" (string_of_expression e);;
 
 let rec get_system expr ind map_free map_bond = match expr with
   | Var(Name (s)) -> begin
-                        let id = if (not (Ht.mem map_bond s)) then begin
-                            if (not (Ht.mem map_free s)) then Ht.add map_free s (ind + 1);
-                            Ht.find map_free s
-                          end
-                        else Ht.find map_bond s
+                        let id =  match (Ht.find_opt map_bond s) with
+                                    | Some(x) -> x
+                                    | None -> match (Ht.find_opt map_free s) with
+                                      | Some(y) -> y
+                                      | None -> begin
+                                                  Ht.add map_free s (ind + 1);
+                                                  (ind + 1)
+                                                end
                         in
                         ([],  Atom(id), (ind + 1))
                       end
@@ -100,10 +103,10 @@ let subst rule equal =  if (rule = equal) then equal
 let rec solve_system system substed = if (List.exists bad_equal system) then None else begin
   let prev = system in
   
-  let system1 = List.filter not_id system in
-  let system2 = List.rev_map revert system1 in
-  let system3 = List.rev_map reduct system2 in
-  let system4 = List.flatten system3 in
+  let system1 = List.rev_map reduct system in
+  let system2 = List.flatten system1 in
+  let system3 = List.rev_map revert system2 in
+  let system4 = List.filter not_id system3 in
   match (List.find_opt (is_subst substed) system4) with
     | None -> (match (List.compare_lengths prev system4) with
                 | 0 -> if (List.for_all2 (=) prev system4) then Some(system4) else solve_system system4 substed
