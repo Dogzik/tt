@@ -30,7 +30,7 @@ let term_to_string term = begin
 end;; 
 
 let print_eq eq = fprintf stdout "%s = %s\n" (term_to_string eq.left) (term_to_string eq.right);;
-
+let print_expr e = fprintf stdout "%s\n" (string_of_expression e);;
 
 
 let rec get_system expr ind map_free map_bond = match expr with
@@ -46,7 +46,8 @@ let rec get_system expr ind map_free map_bond = match expr with
   | Apl(p, q) -> begin
                     let (e_p, t_p, ind_1) = get_system p ind map_free map_bond in
                     let (e_q, t_q, ind_2) = get_system q ind_1 map_free map_bond in
-                    let e = {left = t_p; right = Impl(t_q, Atom(ind_2 + 1))}::(List.rev_append e_p e_q) in
+                    let new_e = {left = t_p; right = Impl(t_q, Atom(ind_2 + 1))} in
+                    let e = new_e::(List.rev_append e_p e_q) in
                     (e, Atom(ind_2 + 1), (ind_2 + 1))
                   end
   | Lambda(Name(s), p) -> begin
@@ -98,39 +99,21 @@ let subst rule equal =  if (rule = equal) then equal
 
 let rec solve_system system substed = if (List.exists bad_equal system) then None else begin
   let prev = system in
-  (*
-  print_string "Was:\n";
-  List.iter print_eq prev;
-  *)
+  
   let system1 = List.filter not_id system in
   let system2 = List.rev_map revert system1 in
   let system3 = List.rev_map reduct system2 in
   let system4 = List.flatten system3 in
-  (*
-  print_string "After flat_map\n";
-  List.iter print_eq system4;
-  *)
-  let system5 = match (List.find_opt (is_subst substed) system4) with
-    | None -> List.rev system4
+  match (List.find_opt (is_subst substed) system4) with
+    | None -> (match (List.compare_lengths prev system4) with
+                | 0 -> if (List.for_all2 (=) prev system4) then Some(system4) else solve_system system4 substed
+                | _ -> solve_system system4 substed
+              )
     | Some(rule) -> begin
                       Ht.add substed (rule.left) true;
-                      List.rev_map (subst rule) system4
+                      let system5 = List.rev_map (subst rule) system4 in
+                      solve_system system5 substed
                     end
-  in
-  let system6 = List.rev system5 in
-  (*
-  print_string "Got:\n";
-  List.iter print_eq system6;
-  print_string "\n";
-  *)
-  if ((List.compare_lengths prev system6) = 0) then
-    begin
-      if (List.for_all2 (=) prev system6) then Some(system6) else solve_system system6 substed
-    end
-  else
-    begin
-      solve_system system6 substed
-    end
 end;;
 
 let rec apply_subst term solution = match term with

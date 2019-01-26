@@ -1,4 +1,5 @@
 open Solver;;
+open Printf;;
 open Grammar;;
 
 module Ht = Hashtbl;;
@@ -19,7 +20,8 @@ let rec proof_inner expr solution map_free map_bond ctx cur_tab ind = match expr
                         | None -> Ht.find map_free s
                       in
                       let s_t = apply_subst (Atom(id)) solution in
-                      (s, s_t, [String.concat "" [cur_tab; ctx; " |- "; s; " : "; (term_to_string s_t); " [rule #1]"]], (ind + 1))
+                      let cur_proof = String.concat "" [cur_tab; ctx; " |- "; s; " : "; (term_to_string s_t); " [rule #1]"] in
+                      (s, s_t, [cur_proof], (ind + 1))
                     end
   | Lambda(Name(s), p) -> begin
                             Ht.add map_bond s (ind + 1);
