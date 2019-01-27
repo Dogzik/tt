@@ -29,7 +29,10 @@ end;;
 
 let expr = read_stdin () >> Lexing.from_string >> Parser.main Lexer.main;;
 
+(*fprintf stdout "%s\n" (string_of_expression expr);;*)
+
 let d_expr = to_de_bruijn expr;;
+(*print_string ((de_bruijn_to_string d_expr) ^ "\n");;*)
 (*print_string ((de_bruijn_to_string d_expr) ^ "\n");;
 let arg = Lambda(BondVar(0));;
 
@@ -41,6 +44,8 @@ print_string ((de_bruijn_to_string tmp) ^ "\n");
 *)
 
 let norm = reduct d_expr;;
-print_string ((de_bruijn_to_string norm) ^ "\n");;
+let bond_name = get_vacant_name norm;;
+(*print_string ((de_bruijn_to_string norm) ^ "\n");;*)
+print_string ((de_bruijn_to_output norm bond_name) ^ "\n");;
 close_out stdout;;
 close_in stdin;;
