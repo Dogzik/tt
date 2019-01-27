@@ -27,7 +27,7 @@ let term_to_string term = begin
   let buff1 = Buffer.create 1488 in
   let buff2 = term_to_string_inner term buff1 in
   Buffer.contents buff2
-end;; 
+end;;
 
 let print_eq eq = fprintf stdout "%s = %s\n" (term_to_string eq.left) (term_to_string eq.right);;
 let print_expr e = fprintf stdout "%s\n" (string_of_expression e);;
@@ -76,7 +76,7 @@ let revert equal = match equal with
   | _ -> equal
 ;;
 
-let not_id equal = match equal with 
+let not_id equal = match equal with
     | {left = Atom(a); right = Atom(b)} when (a = b) -> false
     | _ -> true
 ;;
@@ -102,7 +102,7 @@ let subst rule equal =  if (rule = equal) then equal
 
 let rec solve_system system substed = if (List.exists bad_equal system) then None else begin
   let prev = system in
-  
+
   let system1 = List.rev_map reduct system in
   let system2 = List.flatten system1 in
   let system3 = List.rev_map revert system2 in
@@ -126,4 +126,3 @@ let rec apply_subst term solution = match term with
                 )
   | Impl(a, b) -> Impl((apply_subst a solution), (apply_subst b solution))
 ;;
-
