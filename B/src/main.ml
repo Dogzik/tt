@@ -26,23 +26,9 @@ let read_stdin () = begin
   contents buff2
 end;;
 
-
 let expr = read_stdin () >> Lexing.from_string >> Parser.main Lexer.main;;
 
-(*fprintf stdout "%s\n" (string_of_expression expr);;*)
-
 let d_expr = to_de_bruijn expr;;
-(*print_string ((de_bruijn_to_string d_expr) ^ "\n");;*)
-(*print_string ((de_bruijn_to_string d_expr) ^ "\n");;
-let arg = Lambda(BondVar(0));;
-
-let tmp = match d_expr with
-| Lambda(Lambda(p)) -> Lambda(Lambda(subst p arg))
-| _ -> d_expr
-;;
-print_string ((de_bruijn_to_string tmp) ^ "\n");
-*)
-
 let norm = reduct d_expr;;
 let bond_name = get_vacant_name norm;;
 (*print_string ((de_bruijn_to_string norm) ^ "\n");;*)

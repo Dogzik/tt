@@ -57,9 +57,7 @@ let get_vacant_name expr = begin
   (String.map (fun c -> 't') biggest) ^ "t"
 end;;
 
-let rec de_bruijn_to_output_inner expr arg buff ind = begin
-  
-match expr with
+let rec de_bruijn_to_output_inner expr arg buff ind = match expr with
 | FreeVar(s) -> Buffer.add_string buff s;
 | BondVar(x) -> begin
                   Buffer.add_string buff arg;
@@ -80,7 +78,7 @@ match expr with
                   de_bruijn_to_output_inner p arg buff (ind + 1);
                   Buffer.add_string buff ")";
                 end
-end;;
+;;
 
 let de_bruijn_to_output expr arg = begin
   let buff = Buffer.create 1337 in

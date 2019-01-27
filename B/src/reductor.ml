@@ -22,42 +22,26 @@ let subst expr arg = match expr with
 | _ -> expr
 ;;
 
-(*
-let rec reduct expr = begin
-  (*print_debr expr;*)
-  match expr with
-  | Apl(a, b) -> (match a with
-                  | Lambda(p) -> reduct (subst a b)
-                  | _ ->  begin
-                            let a_red = reduct a in
-                            match a_red with
-                            | Lambda(q) -> reduct (subst a_red b)
-                            | _ ->  Apl(a_red, (reduct b))
-                          end
-                  )
-  | Lambda(p) -> Lambda(reduct p)
-  | FreeVar(x) -> expr
-  | BondVar(s) -> expr
-end;;
-*)
-
-let rec reduct expr = begin
+let rec reduct expression = begin
   let rec reduct_inner expr = match expr with
     | Apl(a, b) -> (match a with
                     | Lambda(p) -> ((subst a b), true)
                     | _ ->  begin
                               let (a_red, change_a) = reduct_inner a in
-                              if (change_a) then (Apl(a_red, b), true) else (Apl(a, reduct b), false)
+                              if (change_a) then (Apl(a_red, b), true) else begin
+                                let (b_red, change_b) = reduct_inner b in
+                                (Apl(a, b_red), change_b)
+                              end
                             end
                     )
     | Lambda(p) ->  begin
-                    let (p_red, changed) = reduct_inner p in
-                    (Lambda(p_red), changed)
+                      let (p_red, changed) = reduct_inner p in
+                      (Lambda(p_red), changed)
                     end
     | FreeVar(x) -> (expr, false)
     | BondVar(s) -> (expr, false)
   in
-  let (x, t) = reduct_inner expr in
+  let (x, t) = reduct_inner expression in
   let e = ref x in
   let f = ref t in
   while (!f) do
